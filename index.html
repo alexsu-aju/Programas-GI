@@ -94,6 +94,48 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
 .mbtn.act-o{color:var(--orange-l);border-color:rgba(251,146,60,.35);background:rgba(194,65,12,.1);}
 .mbtn.act-o:hover{background:rgba(194,65,12,.2);}
 #modal-p2btn{display:none;}
+
+/* ── WELCOME OVERLAY ── */
+#welcome{position:fixed;inset:0;z-index:200;background:rgba(7,11,18,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;}
+#welcome.gone{opacity:0;pointer-events:none;}
+.wcard{max-width:520px;width:calc(100% - 40px);text-align:center;}
+.wtag{font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold-l);margin-bottom:16px;}
+.wcard h2{font-size:24px;font-weight:800;color:var(--text);line-height:1.35;margin-bottom:10px;}
+.wcard>p{font-size:12.5px;color:var(--text2);line-height:1.8;margin-bottom:28px;}
+.wchannels{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.wch{flex:1;padding:14px 10px 12px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,.02);}
+.wch .wdot{width:8px;height:8px;border-radius:50%;margin:0 auto 9px;}
+.wch .wlbl{font-size:10px;font-weight:700;letter-spacing:.4px;margin-bottom:5px;}
+.wch .wdesc{font-size:9.5px;color:var(--text2);line-height:1.5;opacity:.8;}
+.wstart{background:var(--gold-l);color:#111;border:none;padding:12px 38px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:opacity .15s;margin-bottom:14px;}
+.wstart:hover{opacity:.85;}
+.whint{font-size:10px;color:var(--text2);opacity:.35;letter-spacing:.3px;}
+
+/* ── RESET BUTTON ── */
+#reset-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text2);font-size:11px;padding:5px 12px;border-radius:5px;cursor:pointer;transition:background .15s,color .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+#reset-btn:hover{background:rgba(255,255,255,.08);color:var(--text);}
+
+/* ── MOBILE SIDEBAR DRAWER ── */
+#sb-backdrop{display:none;position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.55);}
+#sb-backdrop.show{display:block;}
+@media(max-width:768px){
+  .hleg{display:none;}
+  #header h1{font-size:12px;}
+  #reset-btn span{display:none;}
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:40;width:270px!important;transform:translateX(-100%);opacity:1!important;transition:transform .28s cubic-bezier(.4,0,.2,1);}
+  #sidebar.mobile-open{transform:translateX(0);}
+  #sidebar.closed{width:270px!important;opacity:1!important;transform:translateX(-100%);}
+  #tog{left:0!important;top:56px;transform:none;}
+  #tog.c{left:0!important;}
+  .darea{padding:6px 4px;}
+  #modal{bottom:12px;}
+  #modal-card{max-width:100%!important;width:calc(100% - 20px)!important;}
+  .wchannels{flex-direction:column;gap:8px;}
+  .wcard h2{font-size:20px;}
+}
+@media(min-width:769px){
+  #sb-backdrop{display:none!important;}
+}
 </style>
 </head>
 <body>
@@ -103,6 +145,9 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
     <i id="ticon" class="fa-solid fa-chevron-left"></i>
   </button>
   <h1><span>GI</span> · Mapa de Comunicación — Gestión de Impacto</h1>
+  <button id="reset-btn" onclick="resetToOverview()" title="Volver a la vista general">
+    <i class="fa-solid fa-rotate-left" style="font-size:10px"></i><span>Vista general</span>
+  </button>
   <div class="hleg">
     <div class="hli"><div class="hld" style="background:var(--green-l)"></div>Canal Directo</div>
     <div class="hli"><div class="hld" style="background:var(--red-l)"></div>Pasa por Stephany</div>
@@ -110,6 +155,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
   </div>
 </div>
 
+<div id="sb-backdrop" onclick="closeSBMobile()"></div>
 <div class="app">
   <aside id="sidebar">
     <div class="sb-head"><h2>Escenarios de Comunicación</h2><p>Selecciona para ver el flujo</p></div>
@@ -164,7 +210,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
       <g id="ptl"></g>
 
       <!-- AE -->
-      <g id="nae" transform="translate(270,112)" class="draggable" onmousedown="startDrag(event,'ae')">
+      <g id="nae" transform="translate(270,112)" class="draggable" onmousedown="startDrag(event,'ae')" ontouchstart="startDrag(event,'ae')">
         <circle r="96" fill="url(#gae)" stroke="#7c3aed" stroke-width="1.8" filter="url(#fshadow)"/>
         <circle id="pae" r="96" fill="none" stroke="#7c3aed" stroke-width="3" opacity="0"/>
         <text text-anchor="middle" y="-52" fill="#fff" font-size="27" font-weight="800" letter-spacing="2">AE</text>
@@ -180,7 +226,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
       </g>
 
       <!-- IL -->
-      <g id="nil" transform="translate(790,112)" class="draggable" onmousedown="startDrag(event,'il')">
+      <g id="nil" transform="translate(790,112)" class="draggable" onmousedown="startDrag(event,'il')" ontouchstart="startDrag(event,'il')">
         <circle r="96" fill="url(#gil)" stroke="#3b82f6" stroke-width="1.8" filter="url(#fshadow)"/>
         <circle id="pil" r="96" fill="none" stroke="#3b82f6" stroke-width="3" opacity="0"/>
         <text text-anchor="middle" y="-52" fill="#fff" font-size="27" font-weight="800" letter-spacing="2">IL</text>
@@ -199,7 +245,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
       </g>
 
       <!-- ME -->
-      <g id="nme" transform="translate(270,500)" class="draggable" onmousedown="startDrag(event,'me')">
+      <g id="nme" transform="translate(270,500)" class="draggable" onmousedown="startDrag(event,'me')" ontouchstart="startDrag(event,'me')">
         <circle r="96" fill="url(#gme)" stroke="#e11d48" stroke-width="1.8" filter="url(#fshadow)"/>
         <circle id="pme" r="96" fill="none" stroke="#e11d48" stroke-width="3" opacity="0"/>
         <text text-anchor="middle" y="-52" fill="#fff" font-size="27" font-weight="800" letter-spacing="2">ME</text>
@@ -215,7 +261,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
       </g>
 
       <!-- CEEX -->
-      <g id="nceex" transform="translate(790,500)" class="draggable" onmousedown="startDrag(event,'ceex')">
+      <g id="nceex" transform="translate(790,500)" class="draggable" onmousedown="startDrag(event,'ceex')" ontouchstart="startDrag(event,'ceex')">
         <circle r="96" fill="url(#gceex)" stroke="#10b981" stroke-width="1.8" filter="url(#fshadow)"/>
         <circle id="pceex" r="96" fill="none" stroke="#10b981" stroke-width="3" opacity="0"/>
         <text text-anchor="middle" y="-52" fill="#fff" font-size="22" font-weight="800" letter-spacing="2">CEEX</text>
@@ -231,7 +277,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
       </g>
 
       <!-- STEPHANY -->
-      <g id="nsth" transform="translate(530,197)" class="draggable" onmousedown="startDrag(event,'sth')">
+      <g id="nsth" transform="translate(530,197)" class="draggable" onmousedown="startDrag(event,'sth')" ontouchstart="startDrag(event,'sth')">
         <rect x="-106" y="-33" width="212" height="66" rx="11" fill="url(#gsth)" stroke="#0891b2" stroke-width="2" filter="url(#fshadow)"/>
         <text text-anchor="middle" y="-14" fill="#a0d8e8" font-size="10" font-weight="600" letter-spacing="1.2">DIRECTORA DE PROGRAMAS</text>
         <text text-anchor="middle" y="7" fill="#fff" font-size="16" font-weight="800" letter-spacing=".3">Stephany Fuentes</text>
@@ -239,7 +285,7 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
       </g>
 
       <!-- GI -->
-      <g id="ngi" transform="translate(530,318)" class="draggable" onmousedown="startDrag(event,'gi')">
+      <g id="ngi" transform="translate(530,318)" class="draggable" onmousedown="startDrag(event,'gi')" ontouchstart="startDrag(event,'gi')">
         <circle r="86" fill="#0b0804" stroke="#b8873a" stroke-width="2" filter="url(#fshadow)"/>
         <g transform="translate(-29,2)">
           <circle r="32" fill="#2a1a00" stroke="#b8873a" stroke-width="1.4"/>
@@ -257,6 +303,34 @@ body.node-dragging #diagram .draggable{cursor:grabbing;}
         <text text-anchor="middle" y="66" fill="#b8873a" font-size="8" opacity=".65" letter-spacing="1.2">Gestión de Impacto</text>
       </g>
     </svg>
+  </div>
+</div>
+
+<!-- WELCOME OVERLAY -->
+<div id="welcome">
+  <div class="wcard">
+    <div class="wtag">Gestión de Impacto · GI</div>
+    <h2>Mapa de Comunicación<br>entre Programas y GI</h2>
+    <p>Este diagrama muestra cómo debe fluir la comunicación según el tipo de solicitud. Hay tres canales: algunos casos van directo a MEL o EFC, otros deben pasar primero por Stephany.</p>
+    <div class="wchannels">
+      <div class="wch">
+        <div class="wdot" style="background:#4ade80"></div>
+        <div class="wlbl" style="color:#4ade80">Canal Directo</div>
+        <div class="wdesc">Dudas técnicas u operativas, sin impacto metodológico</div>
+      </div>
+      <div class="wch">
+        <div class="wdot" style="background:#f87171"></div>
+        <div class="wlbl" style="color:#f87171">Pasa por Stephany</div>
+        <div class="wdesc">Cambios metodológicos o de alcance que afectan a los programas</div>
+      </div>
+      <div class="wch">
+        <div class="wdot" style="background:#fb923c"></div>
+        <div class="wlbl" style="color:#fb923c">Canal Escalado</div>
+        <div class="wdesc">Cuando el canal directo falla de forma repetida</div>
+      </div>
+    </div>
+    <button class="wstart" onclick="closeWelcome()">Entendido, explorar el mapa</button>
+    <div class="whint">Selecciona un escenario en el panel izquierdo para ver la animación</div>
   </div>
 </div>
 
@@ -359,12 +433,20 @@ function svgPoint(evt){
 }
 
 function startDrag(evt,nodeId){
-  if(evt.button!==0)return;
+  if(evt.button!==undefined&&evt.button!==0)return;
   evt.preventDefault();
   dragTarget=nodeId;isDragging=false;
-  const p=svgPoint(evt);
+  const src=evt.touches?evt.touches[0]:evt;
+  const p=svgPoint(src);
   dragSVGStart={x:p.x,y:p.y};
   dragNodeStart={x:N[nodeId].x,y:N[nodeId].y};
+}
+
+function svgPointFromClient(clientX,clientY){
+  const svg=document.getElementById('diagram');
+  const pt=svg.createSVGPoint();
+  pt.x=clientX;pt.y=clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
 }
 
 /* ═══════════════════════════════════════════
@@ -389,10 +471,9 @@ document.getElementById('modal-handle').addEventListener('mousedown',(e)=>{
 /* ═══════════════════════════════════════════
    GLOBAL MOUSE EVENTS
 ═══════════════════════════════════════════ */
-window.addEventListener('mousemove',(evt)=>{
-  // Node drag
+function handleMove(clientX,clientY){
   if(dragTarget){
-    const p=svgPoint(evt);
+    const p=svgPointFromClient(clientX,clientY);
     const dx=p.x-dragSVGStart.x,dy=p.y-dragSVGStart.y;
     if(!isDragging&&Math.sqrt(dx*dx+dy*dy)<3)return;
     if(!isDragging){isDragging=true;document.body.classList.add('node-dragging');}
@@ -400,20 +481,27 @@ window.addEventListener('mousemove',(evt)=>{
     N[dragTarget].x=nx;N[dragTarget].y=ny;
     if(dragTarget==='gi'){N.mel.x=nx-29;N.mel.y=ny+2;N.efc.x=nx+29;N.efc.y=ny+2;}
     document.getElementById('n'+dragTarget)?.setAttribute('transform',`translate(${nx},${ny})`);
-    updateLR(); // <- lines follow the node live
+    updateLR();
   }
-  // Modal drag
   if(mDrag){
     const card=document.getElementById('modal-card');
-    card.style.left=(mDrag.cardLeft+(evt.clientX-mDrag.startX))+'px';
-    card.style.top =(mDrag.cardTop +(evt.clientY-mDrag.startY))+'px';
+    card.style.left=(mDrag.cardLeft+(clientX-mDrag.startX))+'px';
+    card.style.top =(mDrag.cardTop +(clientY-mDrag.startY))+'px';
   }
-});
+}
 
-window.addEventListener('mouseup',()=>{
+function handleEnd(){
   dragTarget=null;isDragging=false;document.body.classList.remove('node-dragging');
   if(mDrag){document.getElementById('modal-handle').style.cursor='grab';mDrag=null;}
-});
+}
+
+window.addEventListener('mousemove',(evt)=>handleMove(evt.clientX,evt.clientY));
+window.addEventListener('mouseup',handleEnd);
+window.addEventListener('touchmove',(evt)=>{
+  if(dragTarget){evt.preventDefault();}
+  if(evt.touches[0])handleMove(evt.touches[0].clientX,evt.touches[0].clientY);
+},{passive:false});
+window.addEventListener('touchend',handleEnd);
 
 /* ═══════════════════════════════════════════
    ANIMATION ENGINE
@@ -845,12 +933,49 @@ document.querySelectorAll('.sbtn[data-s]').forEach(b=>{
   b.addEventListener('click',()=>run(b.dataset.s));
 });
 
+const isMobile=()=>window.innerWidth<=768;
+
 function toggleSB(){
   const sb=document.getElementById('sidebar'),tog=document.getElementById('tog'),ic=document.getElementById('ticon');
-  sb.classList.toggle('closed');tog.classList.toggle('c');
-  ic.className=sb.classList.contains('closed')?'fa-solid fa-chevron-right':'fa-solid fa-chevron-left';
-  document.documentElement.style.setProperty('--sw',sb.classList.contains('closed')?'0px':'290px');
+  if(isMobile()){
+    const open=sb.classList.toggle('mobile-open');
+    document.getElementById('sb-backdrop').classList.toggle('show',open);
+    ic.className=open?'fa-solid fa-chevron-left':'fa-solid fa-bars';
+  } else {
+    sb.classList.toggle('closed');tog.classList.toggle('c');
+    ic.className=sb.classList.contains('closed')?'fa-solid fa-chevron-right':'fa-solid fa-chevron-left';
+    document.documentElement.style.setProperty('--sw',sb.classList.contains('closed')?'0px':'290px');
+  }
 }
+
+function closeSBMobile(){
+  const sb=document.getElementById('sidebar');
+  sb.classList.remove('mobile-open');
+  document.getElementById('sb-backdrop').classList.remove('show');
+  document.getElementById('ticon').className='fa-solid fa-bars';
+}
+
+function resetToOverview(){
+  clearAll();
+  closeModal();
+  showOverview();
+}
+
+function closeWelcome(){
+  const w=document.getElementById('welcome');
+  w.classList.add('gone');
+  setTimeout(()=>w.style.display='none',420);
+}
+
+// Mobile: initial sidebar icon
+if(isMobile())document.getElementById('ticon').className='fa-solid fa-bars';
+
+// Close sidebar on scenario select (mobile)
+document.querySelectorAll('.sbtn[data-s]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(isMobile())closeSBMobile();
+  });
+});
 
 /* Page load: show overview */
 showOverview();
